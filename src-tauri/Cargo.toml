@@ -1,5 +1,5 @@
 [package]
-name = "prod-front-dsh-client"
+name = "dsh-desktop"
 version = "0.1.0"
 description = "DeepSeek Harness desktop client (Tauri)"
 authors = ["imddc"]
@@ -11,14 +11,15 @@ edition = "2021"
 # The `_lib` suffix may seem redundant but it is necessary
 # to make the lib name unique and wouldn't conflict with the bin name.
 # This seems to be only an issue on Windows, see https://github.com/rust-lang/cargo/issues/8519
-name = "prod_front_dsh_client_lib"
+name = "dsh_desktop_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-tauri = { version = "2", features = [] }
+# macos-private-api：macOS 上启用透明窗口（圆角窗体），通过 GitHub Release 分发，不上 App Store
+tauri = { version = "2", features = ["macos-private-api"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 signal-hook = "0.3"

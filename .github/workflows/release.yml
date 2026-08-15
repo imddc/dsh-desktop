@@ -38,11 +38,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tagName: ${{ github.ref_name }}
-          releaseName: "dsh-client ${{ github.ref_name }}"
+          releaseName: "dsh-desktop ${{ github.ref_name }}"
           releaseBody: |
-            DeepSeek Harness 桌面客户端（捆绑 Node.js + dsh，开箱即用）。
+            DeepSeek Harness 桌面客户端（捆绑运行时，开箱即用）。
 
-            安装：下载 `.dmg`，双击后把 `dsh-client.app` 拖入 Applications。
+            安装：下载 `.dmg`，双击后把 `dsh-desktop.app` 拖入 Applications。
             > 未签名应用：首次打开如被 Gatekeeper 拦截，右键 → 打开。
           releaseDraft: false
           prerelease: false

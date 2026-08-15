@@ -39,7 +39,7 @@ fn boot_status(state: State<'_, Arc<AppState>>) -> BootStatus {
 /// Resolve the absolute path of the `node` binary.
 ///
 /// Priority: bundled runtime in the app's Resources dir, then
-/// `DSH_CLIENT_NODE_BIN` env, then system search (PATH / known locations).
+/// `DSH_DESKTOP_NODE_BIN` env, then system search (PATH / known locations).
 /// Finder-launched .app bundles get a minimal PATH, so the bundled runtime
 /// makes the app work out of the box.
 fn resolve_node(resource_dir: &Path) -> Option<String> {
@@ -47,7 +47,7 @@ fn resolve_node(resource_dir: &Path) -> Option<String> {
     if bundled.is_file() {
         return Some(bundled.to_string_lossy().into_owned());
     }
-    if let Ok(p) = std::env::var("DSH_CLIENT_NODE_BIN") {
+    if let Ok(p) = std::env::var("DSH_DESKTOP_NODE_BIN") {
         if Path::new(&p).exists() {
             return Some(p);
         }
@@ -107,7 +107,7 @@ fn resolve_dsh(resource_dir: &Path) -> Option<String> {
     if bundled.is_file() {
         return Some(bundled.to_string_lossy().into_owned());
     }
-    if let Ok(p) = std::env::var("DSH_CLIENT_DSH_BIN") {
+    if let Ok(p) = std::env::var("DSH_DESKTOP_DSH_BIN") {
         if Path::new(&p).exists() {
             return Some(p);
         }
@@ -146,10 +146,10 @@ fn resolve_dsh(resource_dir: &Path) -> Option<String> {
 /// Spawn `dsh web --port 0` and return the child plus its piped stdout.
 fn spawn_dsh(resource_dir: &Path) -> Result<(Child, BufReader<std::process::ChildStdout>), String> {
     let node = resolve_node(resource_dir).ok_or_else(|| {
-        "未找到 Node.js：请安装 Node.js，或设置环境变量 DSH_CLIENT_NODE_BIN".to_string()
+        "未找到 Node.js：请安装 Node.js，或设置环境变量 DSH_DESKTOP_NODE_BIN".to_string()
     })?;
     let dsh = resolve_dsh(resource_dir).ok_or_else(|| {
-        "未找到 dsh 命令：请安装 @deepseek-ai/dsh，或设置环境变量 DSH_CLIENT_DSH_BIN".to_string()
+        "未找到 dsh 命令：请安装 @deepseek-ai/dsh，或设置环境变量 DSH_DESKTOP_DSH_BIN".to_string()
     })?;
 
     let mut cmd = Command::new(&node);
@@ -158,7 +158,7 @@ fn spawn_dsh(resource_dir: &Path) -> Result<(Child, BufReader<std::process::Chil
         .stdout(Stdio::piped())
         .stderr(Stdio::piped());
 
-    let ws = std::env::var("DSH_CLIENT_WORKSPACE")
+    let ws = std::env::var("DSH_DESKTOP_WORKSPACE")
         .unwrap_or_else(|_| std::env::var("HOME").unwrap_or_else(|_| "/".into()));
     cmd.current_dir(ws);
 
@@ -255,9 +255,14 @@ pub fn run() {
             std::thread::spawn(move || boot_worker(app_state, resource_dir));
 
             WebviewWindowBuilder::new(app, "main", WebviewUrl::App("index.html".into()))
-                .title("DeepSeek Harness")
+                .title("dsh-desktop")
                 .inner_size(1280.0, 800.0)
                 .min_inner_size(900.0, 600.0)
+                // 无原生标题栏：标题栏由外壳页自绘（Liquid Glass 三灯）
+                // 透明窗口 + CSS 圆角，得到 Codex 式圆角窗体；macOS 会按内容形状自动绘制阴影
+                .decorations(false)
+                .transparent(true)
+                .shadow(true)
                 .build()?;
             Ok(())
         })
