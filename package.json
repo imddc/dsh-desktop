@@ -1,0 +1,15 @@
+{
+  "name": "prod-front-dsh-client",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "tauri": "tauri",
+    "dev": "tauri dev",
+    "build": "tauri build",
+    "dist": "tauri build && node scripts/copy-dist.mjs"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2"
+  }
+}
