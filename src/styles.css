@@ -1,9 +1,50 @@
-/* dsh-desktop 外壳页样式：极简深色标题栏（向 Codex 靠齐）+ 液态玻璃三灯 */
+/* dsh-desktop 外壳页样式：极简标题栏（向 Codex 靠齐）+ 液态玻璃三灯 + 主题跟随系统 */
 
 :root {
   --topbar-height: 42px;
   --light-size: 15px;
+
+  /* 深色主题（默认） */
+  --app-bg: #0b0d10;
+  --app-border: rgba(255, 255, 255, 0.06);
+  --topbar-bg: rgba(11, 13, 16, 0.72);
+  --topbar-border: rgba(255, 255, 255, 0.06);
+  --text: #e6edf3;
+  --text-dim: rgba(230, 237, 243, 0.52);
+  --hover: rgba(255, 255, 255, 0.08);
+  --gui-bg: #0b0d10;
+  --loader-bg: #0b0d10;
+  --status: #8b949e;
+  --spinner-track: #21262d;
+  --spinner-front: #4c9aff;
+  --error-color: #ff7b72;
+  --error-bg: rgba(248, 81, 73, 0.08);
+  --error-border: rgba(248, 81, 73, 0.3);
+  --hint: #484f58;
+
   color-scheme: dark;
+}
+
+/* 浅色主题：由 JS 解析系统偏好后写入 data-theme="light" */
+:root[data-theme="light"] {
+  --app-bg: #f5f6f8;
+  --app-border: rgba(0, 0, 0, 0.09);
+  --topbar-bg: rgba(255, 255, 255, 0.72);
+  --topbar-border: rgba(0, 0, 0, 0.08);
+  --text: #1f2328;
+  --text-dim: rgba(31, 35, 40, 0.55);
+  --hover: rgba(0, 0, 0, 0.06);
+  --gui-bg: #f5f6f8;
+  --loader-bg: #f5f6f8;
+  --status: #57606a;
+  --spinner-track: #d0d7de;
+  --spinner-front: #0969da;
+  --error-color: #cf222e;
+  --error-bg: rgba(208, 60, 52, 0.08);
+  --error-border: rgba(208, 60, 52, 0.3);
+  --hint: #8c959f;
+
+  color-scheme: light;
 }
 
 * {
@@ -27,23 +68,23 @@ body {
     "PingFang SC", "Microsoft YaHei", sans-serif;
   /* 窗口透明，圆角与底色由 .app 绘制（配合 decorations(false) + transparent 得到圆角窗体） */
   background: transparent;
-  color: #e6edf3;
+  color: var(--text);
   user-select: none;
   -webkit-font-smoothing: antialiased;
 }
 
-/* 圆角窗体表面：Codex 式深色 + 发丝描边，四角外透出桌面 */
+/* 圆角窗体表面：深/浅色 + 发丝描边，四角外透出桌面 */
 .app {
   display: flex;
   flex-direction: column;
   height: 100%;
   border-radius: 12px;
   overflow: hidden;
-  background: #0b0d10;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--app-bg);
+  border: 1px solid var(--app-border);
 }
 
-/* ---------- 标题栏（极简深色） ---------- */
+/* ---------- 标题栏（极简） ---------- */
 
 .topbar {
   flex: 0 0 var(--topbar-height);
@@ -52,10 +93,10 @@ body {
   justify-content: space-between;
   gap: 14px;
   padding: 0 16px;
-  background: rgba(11, 13, 16, 0.72);
+  background: var(--topbar-bg);
   -webkit-backdrop-filter: blur(24px);
   backdrop-filter: blur(24px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid var(--topbar-border);
   z-index: 10;
 }
 
@@ -78,8 +119,67 @@ body {
   font-size: 12.5px;
   font-weight: 500;
   letter-spacing: 0.2px;
-  color: rgba(230, 237, 243, 0.52);
+  color: var(--text-dim);
   white-space: nowrap;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ---------- 主题切换按钮 ---------- */
+
+.theme-toggle {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 8px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.theme-toggle:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+
+.theme-toggle:active {
+  transform: scale(0.94);
+}
+
+.theme-toggle svg {
+  width: 15px;
+  height: 15px;
+  pointer-events: none;
+}
+
+/* 按当前档位显示对应图标（auto=半日半月，light=太阳，dark=月亮） */
+.theme-toggle[data-state="auto"] .icon-auto {
+  display: block;
+}
+
+.theme-toggle[data-state="light"] .icon-sun {
+  display: block;
+}
+
+.theme-toggle[data-state="dark"] .icon-moon {
+  display: block;
+}
+
+.theme-toggle .icon-auto,
+.theme-toggle .icon-sun,
+.theme-toggle .icon-moon {
+  display: none;
 }
 
 /* ---------- 液态玻璃三灯（关闭 / 最小化 / 最大化） ---------- */
@@ -180,7 +280,7 @@ body.window-unfocused .light svg {
 }
 
 body.window-unfocused .topbar {
-  border-bottom-color: rgba(255, 255, 255, 0.035);
+  border-bottom-color: var(--topbar-border);
 }
 
 /* ---------- 内容区 ---------- */
@@ -197,7 +297,7 @@ body.window-unfocused .topbar {
   width: 100%;
   height: 100%;
   border: none;
-  background: #0b0d10;
+  background: var(--gui-bg);
   display: none;
 }
 
@@ -214,7 +314,7 @@ body.window-unfocused .topbar {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: #0b0d10;
+  background: var(--loader-bg);
   z-index: 5;
 }
 
@@ -239,7 +339,7 @@ body.window-unfocused .topbar {
 
 .status {
   font-size: 13.5px;
-  color: #8b949e;
+  color: var(--status);
   min-height: 20px;
   margin-bottom: 24px;
 }
@@ -247,8 +347,8 @@ body.window-unfocused .topbar {
 .spinner {
   width: 26px;
   height: 26px;
-  border: 2.5px solid #21262d;
-  border-top-color: #4c9aff;
+  border: 2.5px solid var(--spinner-track);
+  border-top-color: var(--spinner-front);
   border-radius: 50%;
   animation: spin 0.9s linear infinite;
 }
@@ -260,13 +360,13 @@ body.window-unfocused .topbar {
 }
 
 .error {
-  color: #ff7b72;
+  color: var(--error-color);
   font-size: 13px;
   line-height: 1.6;
   white-space: pre-wrap;
   word-break: break-all;
-  background: rgba(248, 81, 73, 0.08);
-  border: 1px solid rgba(248, 81, 73, 0.3);
+  background: var(--error-bg);
+  border: 1px solid var(--error-border);
   border-radius: 10px;
   padding: 12px 16px;
   text-align: left;
@@ -277,7 +377,7 @@ body.window-unfocused .topbar {
 
 .hint {
   font-size: 12px;
-  color: #484f58;
+  color: var(--hint);
   margin-top: 24px;
   line-height: 1.7;
   text-align: center;

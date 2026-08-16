@@ -2,11 +2,57 @@
  * dsh-desktop 外壳页逻辑：
  *  - 轮询 boot_status，就绪后在 iframe 中加载 dsh Web GUI
  *  - 自定义标题栏窗口控制（关闭 / 最小化 / 最大化 / 双击标题栏 / 快捷键）
+ *  - 主题切换（跟随系统 / 浅色 / 深色），选择持久化到 localStorage
  */
 const { invoke } = window.__TAURI__.core;
 const { getCurrentWindow } = window.__TAURI__.window;
 
+const THEME_KEY = "dsh-theme";
+const THEME_NEXT = { auto: "light", light: "dark", dark: "auto" };
+const THEME_LABEL = {
+  auto: "主题：跟随系统（点击切换为浅色）",
+  light: "主题：浅色（点击切换为深色）",
+  dark: "主题：深色（点击切换为跟随系统）",
+};
+const systemLight = window.matchMedia("(prefers-color-scheme: light)");
+
 let appWindow;
+
+/** 读取当前主题档位（auto / light / dark），默认跟随系统。 */
+function getThemeMode() {
+  const mode = localStorage.getItem(THEME_KEY);
+  return mode === "light" || mode === "dark" || mode === "auto" ? mode : "auto";
+}
+
+/**
+ * 应用主题：把解析后的主题写入 <html data-theme>，并同步按钮图标与提示。
+ * auto 档位实时解析系统偏好。
+ */
+function applyTheme() {
+  const mode = getThemeMode();
+  const resolved = mode === "auto" ? (systemLight.matches ? "light" : "dark") : mode;
+  document.documentElement.dataset.theme = resolved;
+
+  const btn = document.getElementById("btn-theme");
+  btn.dataset.state = mode;
+  btn.setAttribute("aria-label", THEME_LABEL[mode]);
+  btn.title = THEME_LABEL[mode];
+}
+
+/** 循环切换：跟随系统 → 浅色 → 深色 → 跟随系统。 */
+function cycleTheme() {
+  localStorage.setItem(THEME_KEY, THEME_NEXT[getThemeMode()]);
+  applyTheme();
+}
+
+/** 绑定主题切换按钮，并监听系统主题变化（auto 档位时实时生效）。 */
+function wireThemeToggle() {
+  document.getElementById("btn-theme").addEventListener("click", cycleTheme);
+  systemLight.addEventListener("change", () => {
+    if (getThemeMode() === "auto") applyTheme();
+  });
+  applyTheme();
+}
 
 /** 展示启动失败信息，并给出可读提示。 */
 function showError(message) {
@@ -68,7 +114,7 @@ function wireWindowControls() {
 
   // 双击标题栏空白处切换最大化（macOS 习惯）
   document.querySelector(".topbar").addEventListener("dblclick", (e) => {
-    if (e.target.closest(".traffic-lights")) return;
+    if (e.target.closest(".traffic-lights") || e.target.closest(".topbar-actions")) return;
     appWindow.toggleMaximize();
   });
 
@@ -93,5 +139,6 @@ function wireWindowControls() {
 
 window.addEventListener("DOMContentLoaded", () => {
   wireWindowControls();
+  wireThemeToggle();
   poll();
 });
