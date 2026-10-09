@@ -163,7 +163,10 @@ fn spawn_dsh(resource_dir: &Path) -> Result<(Child, BufReader<std::process::Chil
     cmd.current_dir(ws);
 
     let mut child = cmd.spawn().map_err(|e| format!("启动 dsh 失败: {e}"))?;
-    let stdout = child.stdout.take().ok_or_else(|| "无法读取 dsh 输出".to_string())?;
+    let stdout = child
+        .stdout
+        .take()
+        .ok_or_else(|| "无法读取 dsh 输出".to_string())?;
     Ok((child, BufReader::new(stdout)))
 }
 
@@ -183,10 +186,10 @@ fn boot_worker(app_state: Arc<AppState>, resource_dir: std::path::PathBuf) {
     if let Some(err) = child.stderr.take() {
         let holder = stderr_holder.clone();
         std::thread::spawn(move || {
-            for line in BufReader::new(err).lines() {
-                if let Ok(l) = line {
-                    *holder.lock().unwrap() = l;
-                }
+            // 读 stderr 只要 Ok 的行：用 map_while 而不是 flatten ——
+            // flatten 在读取持续报错时会一直空转，map_while 遇到第一个 Err 就停
+            for line in BufReader::new(err).lines().map_while(Result::ok) {
+                *holder.lock().unwrap() = line;
             }
         });
     }
@@ -284,9 +287,10 @@ pub fn run() {
                 signal_hook::consts::SIGTERM,
                 signal_hook::consts::SIGINT,
             ]) {
-                for _ in signals.forever() {
+                // 等到第一个信号就退出：forever() 本身是阻塞迭代器，取一次即可，
+                // 写成 for + break 会被 clippy 判定为 never_loop
+                if signals.forever().next().is_some() {
                     handle.exit(0);
-                    break;
                 }
             }
         });

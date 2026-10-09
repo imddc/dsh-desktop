@@ -7,9 +7,15 @@
     "tauri": "tauri",
     "dev": "tauri dev",
     "build": "tauri build",
-    "dist": "tauri build && node scripts/copy-dist.mjs"
+    "dist": "tauri build && node scripts/copy-dist.mjs",
+    "lint": "oxlint && cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings",
+    "lint:fix": "oxlint --fix",
+    "format": "oxfmt && cargo fmt --manifest-path src-tauri/Cargo.toml --all",
+    "format:check": "oxfmt --check && cargo fmt --manifest-path src-tauri/Cargo.toml --all --check"
   },
   "devDependencies": {
-    "@tauri-apps/cli": "^2"
+    "@tauri-apps/cli": "^2",
+    "oxfmt": "^0.72.0",
+    "oxlint": "^1.87.0"
   }
 }

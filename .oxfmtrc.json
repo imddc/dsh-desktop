@@ -1,0 +1,8 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  // 本项目没有既有格式化配置，沿用 Oxfmt 默认值（双引号、分号），与现有 .mjs 风格一致。
+  // lockfile 由 npm 自己维护，不参与格式化；README 面向用户、手工排版，也不动。
+  // 关掉 package.json 键排序：npm 不重排键顺序，而 oxfmt 默认会按自己的顺序重写
+  "sortPackageJson": false,
+  "ignorePatterns": ["package-lock.json", "**/*.md"]
+}

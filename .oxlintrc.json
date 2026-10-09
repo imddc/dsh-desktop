@@ -1,0 +1,20 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  // plugins 显式列全：声明它就会替换默认集合，漏写会静默少检查
+  "plugins": ["oxc", "unicorn", "node"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "error"
+  },
+  "env": {
+    "builtin": true,
+    "node": true
+  },
+  "rules": {
+    // __TAURI__ 是 Tauri 注入的全局变量（withGlobalTauri），不是命名问题：
+    // 按规则自己的建议最小范围放行这一个标识符，而不是整条关掉
+    "no-underscore-dangle": ["error", { "allow": ["__TAURI__"] }]
+  },
+  // 依赖、构建产物不进检查范围
+  "ignorePatterns": ["node_modules", "dist", "src-tauri/target"]
+}

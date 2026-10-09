@@ -26,6 +26,16 @@ jobs:
       - name: Install frontend deps
         run: npm ci
 
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      # 只读入口：lint 不修改文件（oxlint + cargo clippy）。
+      # format:check 等全量格式化那个 PR 再接进来。
+      - name: 代码检查
+        run: npm run lint
+
       - name: Prepare bundled runtime (node + dsh)
         run: node scripts/prepare-runtime.mjs
         env:

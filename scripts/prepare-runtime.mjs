@@ -4,7 +4,7 @@
 // Run once before `tauri build`; CI runs it automatically.
 // Override with NODE_VERSION / DSH_VERSION env vars.
 import { execSync } from "node:child_process";
-import { existsSync, mkdirSync, rmSync } from "node:fs";
+import { existsSync, mkdirSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
